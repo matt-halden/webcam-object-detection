@@ -7,6 +7,7 @@ SENDER = "mjah.py@gmail.com"
 RECEIVER = "mjah.py@gmail.com"
 
 def send_email(image):
+    print("Send Email function start")
     email_message = EmailMessage()
     email_message["Subject"] = "Webcam App Email"
     email_message.set_content("Sending over a new webcam image!")
@@ -23,6 +24,8 @@ def send_email(image):
     gmail.login(SENDER, PASSWORD)
     gmail.sendmail(SENDER, RECEIVER, email_message.as_string())
     gmail.quit()
+
+    print("Send Email function End")
 
 if __name__ == "__main__":
     send_email(image="images/153.png")

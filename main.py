@@ -5,6 +5,7 @@ import time
 import glob
 import os
 from emailing import send_email
+from threading import Thread
 
 # Video, input 0 to select the native macOS camera
 video = cv2.VideoCapture(0)
@@ -19,9 +20,11 @@ count = 1
 
 # clean out images folder before sending
 def clean_folder():
+    print("clean folder function start")
     images = glob.glob("images/*.png")
     for image in images:
         os.remove(image)
+    print("clean folder function ended")
 
 while True:
     status = 0
@@ -76,8 +79,13 @@ while True:
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email(image_object)
-        clean_folder()
+        # Implement threading here as webcam freezes once email tries to send. Will execute in background
+        email_thread = Thread(target=send_email, args=(image_object, ))
+        email_thread.daemon = True
+        clean_thread = Thread(target=clean_folder, )
+        clean_thread.daemon = True
+
+        email_thread.start()
 
     print(status_list)
 
@@ -89,3 +97,6 @@ while True:
         break
 
 video.release()
+
+# Delete images once we have quit & email sent
+clean_thread.start()

@@ -2,6 +2,7 @@
 # cv2 is a good library for this, and built on Numpy to handle arrays!
 import cv2
 import time
+import glob
 from emailing import send_email
 
 # Video, input 0 to select the native macOS camera
@@ -13,6 +14,7 @@ time.sleep(1)
 # Define variable for baseline frame
 first_frame = None
 status_list = []
+count = 1
 
 while True:
     status = 0
@@ -53,6 +55,13 @@ while True:
         if rectangle.any():
             # Change status value when one rectangle detected so we don't keep sending tons of emails
             status = 1
+            # Store images we capture
+            cv2.imwrite(f"images/{count}.png", frame)
+            count = count + 1
+            # Grab middle image, assuming that is the best one
+            all_images = glob.glob("images/*.png")
+            index = int(len(all_images) / 2)
+            image_object = all_images[index]
 
     # status_list is so we can detect when an object leaves
     status_list.append(status)
@@ -60,7 +69,7 @@ while True:
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email()
+        send_email(image_object)
     print(status_list)
 
     cv2.imshow("Video", frame)
@@ -71,17 +80,3 @@ while True:
         break
 
 video.release()
-
-"""
-# Add in a one-second pause with time.sleep. 
-# Without it, not enough time to capture image (outputs all 0s)
-# Also, helps emulate a video/longer capture using webcam
-check1, frame1 = video.read()
-time.sleep(1)
-
-check2, frame2 = video.read()
-time.sleep(1)
-
-check3, frame3 = video.read()
-time.sleep(1)
-"""
